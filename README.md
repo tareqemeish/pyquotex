@@ -1,194 +1,168 @@
-# 🚀 PyQuotex
+# Quotex 5-Second Digit Trading Bot
 
----
-<p align="center">
-  <a href="https://github.com/cleitonleonel/pyquotex">
-    <img src="pyquotex.png" alt="pyquotex" width="350" height="auto" title="PyQuotex"/>
-  </a>
-</p>
-<p align="center">
-  <i>Unofficial Quotex Library API Client written in Python!</i>
-</p>
-<p align="center">
-  <img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-green" alt="Python Versions"/>
-</p>
+A complete, single-file trading bot for Quotex that trades based on digit extraction and comparison.
 
----
+## Features
 
-## 📘 Sobre o projeto (PT-BR)
+✅ **5-Second TIMER Trades** - Uses `optionType=100` for true 5-second expiry
+✅ **Digit Strategy** - Compares price digits every 5 seconds
+✅ **Live Dashboard** - Real-time Rich terminal display
+✅ **CSV Logging** - All trades logged with full details
+✅ **Auto-Reconnect** - Handles connection drops gracefully
+✅ **Risk Management** - Take profit, stop loss, consecutive loss cooldown
+✅ **Server Sync** - Precise timing with Quotex server clock
 
-O **PyQuotex** nasceu como uma biblioteca open-source para facilitar a comunicação com a plataforma Quotex via WebSockets. Com o tempo e devido ao uso indevido, uma versão privada mais segura e robusta foi criada.
-
----
-
-## 📘 About the Project (EN)
-
-**PyQuotex** started as an open-source library to make it easier to communicate with the Quotex platform using WebSockets. Due to misuse, a more robust private version was later introduced.
-
----
-
-## 📘 Sobre el Proyecto (ES)
-
-**PyQuotex** nació como una biblioteca de código abierto para facilitar la comunicación con la plataforma Quotex a
-través de WebSockets. Con el tiempo y debido al uso indebido, se creó una versión privada más segura y robusta.
-
----
-
-## 🎯 Objetivo da Biblioteca / Library Goal / Objetivo
-
-Prover ferramentas para desenvolvedores integrarem seus sistemas com a plataforma Quotex, permitindo operações automatizadas de forma segura e eficiente.
-
-> ⚠️ Esta biblioteca **não é um robô de operações** e não toma decisões por conta própria.
-
----
-
-# 📚 Documentação Completa
-https://cleitonleonel.github.io/pyquotex/
-
-
-## 🏗 Arquitectura interna
-
-- `pyquotex.stable_api.Quotex` — facade público (la API que usás).
-- `pyquotex._api/*` — mixins por dominio (account, trading, history, realtime, assets).
-- `pyquotex.cli/*` — entrada de comandos del CLI.
-- `pyquotex.api.QuotexAPI` — cliente WebSocket subyacente.
-
-La interfaz pública no cambia entre 1.0.x y 1.1.0.
-
-
-## 🛠 Instalação
-
-### 1. Clone o repositório:
+## Installation
 
 ```bash
-git clone https://github.com/cleitonleonel/pyquotex.git
-cd pyquotex
-poetry install
-poetry run python app.py
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-```bash
-poetry add git+https://github.com/cleitonleonel/pyquotex.git
-```
+## Configuration
 
-### 3. Otimização de Performance (Opcional)
-
-Para melhor performance no processamento de dados (recomendado para uso em servidores), você pode instalar a biblioteca
-com suporte ao `orjson`:
-
-```bash
-poetry add "pyquotex[fast] @ git+https://github.com/cleitonleonel/pyquotex.git"
-```
-
-*Nota: No Termux (Android), recomendamos usar a instalação padrão sem `orjson` para evitar erros de compilação.*
-
-### 2.1. Instale com um comando no Termux (Android):
-
-```shell
-curl -sSL https://raw.githubusercontent.com/cleitonleonel/pyquotex/refs/heads/master/run_in_termux.sh | sh
-```
-
-
-## 🧪 Exemplo de uso
+Edit `config.py`:
 
 ```python
-from pyquotex.stable_api import Quotex
+# Credentials
+EMAIL = "your-email@example.com"
+PASSWORD = "your-password"
 
-client = Quotex(
-  email="your_email",
-  password="your_password",
-  lang="pt"  # ou "en", "es"
-)
+# Trading
+ASSET = "EURUSD_otc"          # Asset to trade
+STAKE = 1.0                   # Trade amount in USD
+DIGIT_POSITION = 3            # Digit position from right
+DEMO_ACCOUNT = True           # True for demo, False for real
 
-await client.connect()
-print(await client.get_balance())
-
-# Usar conta de torneio / Use tournament account
-from pyquotex.utils.account_type import AccountType
-await client.change_account(AccountType.DEMO, tournament_id=1)
-
-# Buscar histórico profundo paralelo / Fetch parallel deep history
-# ⚠️ CUIDADO: O uso excessivo de workers (> 10) pode causar banimento!
-# ⚠️ WARNING: Excessive workers (> 10) may lead to a ban!
-# ⚠️ ADVERTENCIA: ¡El uso excesivo de workers (> 10) puede causar baneo!
-# Recomendado: 2-5 workers.
-candles = await client.get_historical_candles("EURUSD", amount_of_seconds=86400, period=60, max_workers=5)
-
-await client.close()
+# Risk Management
+TAKE_PROFIT = 10.0            # Take profit in USD (0 = disabled)
+STOP_LOSS = 5.0               # Stop loss in USD (0 = disabled)
+MAX_CONSECUTIVE_LOSSES = 5    # Max consecutive losses before cooldown
+COOLDOWN_SECONDS = 0          # Cooldown after losses (0 = disabled)
 ```
 
----
+## Usage
 
-## 💡 Recursos Principais / Main Features / Funciones Principales
-
-| Função                     | PT-BR                           | EN                        | ES                              |
-|----------------------------|---------------------------------|---------------------------|---------------------------------|
-| `connect()`                | Conecta via WebSocket           | Connects via WebSocket    | Conecta vía WebSocket           |
-| `get_balance()`            | Retorna o saldo da conta        | Returns account balance   | Retorna el saldo                |
-| `buy()`                    | Realiza uma operação            | Places a trade            | Realiza una operación           |
-| `get_candles()`            | Retorna candles recentes        | Returns recent candles    | Retorna velas recientes         |
-| `get_historical_candles()` | **Histórico profundo paralelo** | **Parallel deep history** | **Historial profundo paralelo** |
-| `get_realtime_sentiment()` | Sentimento em tempo real        | Real-time sentiment       | Sentimiento en tiempo real      |
-| `change_account()`         | Alterna entre Real e Demo       | Switch Real/Demo          | Cambiar entre Real/Demo         |
-| `state.status`             | Status do WebSocket (Enum)      | WebSocket Status (Enum)   | Estado del WebSocket (Enum)     |
-| `state.auth_status`        | Status da Autenticação (Enum)   | Auth Status (Enum)        | Estado de Autenticación (Enum)  |
-
----
-
-## 🏗️ Gestão de Estado e Eventos / State & Event Management
-
-O PyQuotex utiliza um sistema moderno de Enums e Eventos para controle de conexão:
-
-```python
-from pyquotex.global_value import WebsocketStatus, AuthStatus
-
-# Verificar status via Enum
-if client.api.state.status == WebsocketStatus.CONNECTED:
-    print("Conectado!")
-
-# Aguardar eventos de mudança de estado
-await client.api.event_registry.wait_event("status_changed")
-await client.api.event_registry.wait_event("auth_changed")
+```bash
+python bot.py
 ```
 
+## How It Works
+
+### 5-Second Trading Cycle
+
+```
+T=0s: Candle opens
+T=1-2s: Wait
+T=3s: ⚡ EXACT MOMENT
+  - Read live price
+  - Extract digit at position 3
+  - Compare with previous digit:
+    * If increased: CALL ⬆️
+    * If decreased: PUT ⬇️
+    * If unchanged: SKIP
+T=4s: Wait
+T=5s: Trade closes, repeat
+```
+
+### Digit Extraction Example
+
+Price: `1.23456`
+Digit Position: `3`
+Result: Extract digit `4` (position 3 from right)
+
+## Dashboard
+
+Live display shows:
+- Connection status
+- Current asset & balance
+- Live price & digits
+- Trading signal
+- Statistics (wins, losses, P/L)
+- Consecutive losses counter
+
+## CSV Logging
+
+All trades saved to `trades.csv`:
+
+```csv
+timestamp,asset,entry_price,previous_digit,current_digit,direction,amount,result,profit_loss,balance,trade_id
+2026-07-25T10:30:15.000Z,EURUSD_otc,1.09876,5,6,call,1.0,WIN,+2.50,1234.56,67890
+```
+
+## Risk Management
+
+### Take Profit
+Bot stops when total profit reaches configured amount.
+
+### Stop Loss
+Bot stops when total loss exceeds configured amount.
+
+### Consecutive Loss Cooldown
+After N consecutive losses, bot enters cooldown period before trading again.
+
+## PyQuotex Integration
+
+Bot uses PyQuotex v1.1.0+ with:
+- `time_mode="TIMER"` → Forces 5-second TIMER trades (optionType=100)
+- `duration=5` → Exact 5-second expiry
+- Event-driven order confirmation
+- WebSocket real-time price streaming
+- Server time synchronization
+
+## File Structure
+
+```
+.
+├── bot.py           # Complete bot (all logic in one file)
+├── config.py        # Configuration only
+├── requirements.txt # Dependencies
+├── trades.csv       # Generated trade log
+└── README.md        # This file
+```
+
+## Requirements
+
+- Python 3.12+
+- Quotex account (demo or real)
+- PyQuotex 1.1.0+
+- Rich for terminal UI
+
+## Warnings
+
+⚠️ **This bot trades real money on Quotex. Use at your own risk.**
+
+- Start with DEMO account
+- Test thoroughly
+- Use small stakes
+- Monitor continuously
+- Understand binary options risks
+
+## Troubleshooting
+
+### Connection Failed
+- Check email/password in `config.py`
+- Verify internet connection
+- Check Quotex account status
+
+### No Price Data
+- Ensure asset is open for trading
+- Try different asset (e.g., `EURUSD` instead of `EURUSD_otc`)
+- Check WebSocket connection in logs
+
+### Trades Not Placing
+- Verify balance is sufficient
+- Check asset is available
+- Review bot logs for errors
+
+## Support
+
+For issues:
+1. Check `config.py` settings
+2. Review bot console output
+3. Check `trades.csv` for trade history
+4. Enable `DEBUG = True` in config.py for detailed logging
+
 ---
 
-## 🔒 Versão Privada Disponível
-
-Uma versão privada está disponível com recursos adicionais, estabilidade aprimorada e melhor suporte.
-
-👉 [Acesse a versão privada](https://t.me/pyquotex/852) para desbloquear o máximo do PyQuotex!
-
-### 💥 Comparativo de Versões
-
-| Recurso                        | Open Source ✅ | Versão Privada ✨      |
-|--------------------------------| ------------- | --------------------- |
-| Suporte a Multilogin           | ❌             | ✅                     |
-| Monitoramento de Sentimentos   | ✅             | ✅ + detecção avançada |
-| Proxy/DNS Customizado          | ❌             | ✅                     |
-| Robustez e Alta Confiabilidade | ✅             | ✨ Nível enterprise    |
-| Velocidade de Execução         | ✅             | ⚡ Ultra rápido        |
-| Suporte                        | ❌             | ✅                     |
-
----
-
-## 🤝 Apoie este projeto
-
-[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/cleiton.leonel)
-
-### 💸 Criptomoedas
-
-* **Dogecoin (DOGE)**: `DMwSPQMk61hq49ChmTMkgyvUGZbVbWZekJ`
-* **Bitcoin (BTC)**: `bc1qtea29xkpyx9jxtp2kc74m83rwh93vjp7nhpgkm`
-* **Ethereum (ETH)**: `0x20d1AD19277CaFddeE4B8f276ae9f3E761523223`
-* **Solana (SOL)**: `4wbE2FVU9x4gVErVSsWwhcdXQnDBrBVQFvbMqaaykcqo`
-
----
-
-## 📞 Contato
-
-* Telegram: [cleitonlc](https://t.me/cleitonlc)
-* GitHub: [cleitonleonel](https://github.com/cleitonleonel)
-* LinkedIn: [Cleiton Leonel](https://www.linkedin.com/in/cleiton-leonel-creton-331138167/)
-
----
+**Happy Trading! 📈**
